@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.Comparator;
 import java.util.Collections;
 import java.util.Iterator;
-
+import java.util.concurrent.ThreadLocalRandom;
 
 
 class solvedContainer
@@ -408,10 +408,16 @@ class Node
 	 * */
 	public void expand(int expnum)
 	{
-		String actions[] = {"U", "D", "L", "R"};
+		//Dont always use the same order.
+		String actions[][] = {{"U", "D", "L", "R"},
+							{"D", "U", "R", "L"},
+							{"L", "D", "R", "U"},
+							{"D", "L", "U", "R"},};
+
+		int randInt = ThreadLocalRandom.current().nextInt(0, 4);
 		boolean wasNull = false;
 
-		for(String act : actions)
+		for(String act : actions[randInt])
 		{
 			int newState[] = this.changeState(act);
 
@@ -545,7 +551,7 @@ class SortByBoth implements Comparator<Child>
 
 
 
-public class hwk3prob3
+public class EightPuzzleSolver_Swindell
 {
 	public enum Hueristic
 	{
@@ -563,11 +569,12 @@ public class hwk3prob3
 		generateProblems(15);
 		System.exit(0);
 		*/
+		
 		int set=0;
 		int problem=0;
 		try
 		{
-			Scanner reader = new Scanner(new File("inputFile.txt"));
+			Scanner reader;
 			int lineNo=1;
 			solvedContainer soltn;
 			ArrayList<Parent> soltnLineage = null;
@@ -595,7 +602,10 @@ public class hwk3prob3
 
 			
 				OutHueristic.write("################### Using Heuristic "+h+"###################\n");
-
+				reader = new Scanner(new File("inputFile.txt"));
+				lineNo=1;
+				
+				System.out.println( "Solving problem set with Heuristic "+h );
 				while( reader.hasNextLine() )
 				{
 					if(lineNo == 1)
@@ -620,17 +630,22 @@ public class hwk3prob3
 					Node nd = parseLine(reader.nextLine());
 					
 					soltn = solve(nd, h);
+
 					for(Parent ancestor : soltn.ch.node.getLineage())
 					{
 						OutHueristic.write("\t"+ancestor.toString() + "\n");
 					}
 					lineNo++;
 					problem++;
-				}	
+				}
+				lineNo=0;
+				reader.close();	
 				OutHueristic.close();
 
 			}
-
+		
+		System.out.println( "Finished solving all problems with each heuristic." );
+		System.out.println( "Have a nice day!" );
 		}
 		catch(FileNotFoundException e)
 		{
@@ -711,7 +726,7 @@ public class hwk3prob3
 
 	public static void generateProblems(int nMoves)
 	{
-		int state[] = {1, 2, 3, 8, 4, 6, 7, 5, 0};
+		int state[] = {1, 2, 3, 4, 5, 6, 7, 8, 0};
 		ArrayList<Child> probs = new ArrayList<Child>();
 		ArrayList<Child> buffer = new ArrayList<Child>();
 		Node node = new Node(state, null);
@@ -719,7 +734,7 @@ public class hwk3prob3
 		
 		ArrayList<Child> nextGen = node.getChildren();
 
-		for(int ii=0; ii<nMoves-1; ii++)
+		for(int ii=0; ii<nMoves; ii++)
 		{
 			for(Child child : nextGen)
 			{
